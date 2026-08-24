@@ -27,7 +27,7 @@ export default function Login() {
       return;
     }
 
-    window.location.href = "/";
+window.location.href = "/app";
   }
 
   return (
