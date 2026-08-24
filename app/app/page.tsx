@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -32,6 +33,164 @@ const SUBSTANCES = [
   "Alcohol",
   "Cannabis",
   "Otra sustancia",
+];
+
+const patternWords = [
+  {
+    name: "Agua",
+    words: [
+      "agua",
+      "mar",
+      "piscina",
+      "río",
+      "rio",
+      "lluvia",
+      "océano",
+      "oceano",
+      "playa",
+    ],
+  },
+  {
+    name: "Casa",
+    words: [
+      "casa",
+      "habitación",
+      "habitacion",
+      "piso",
+      "salón",
+      "salon",
+      "cocina",
+      "puerta",
+    ],
+  },
+  {
+    name: "Familia",
+    words: [
+      "madre",
+      "padre",
+      "mamá",
+      "mama",
+      "papá",
+      "papa",
+      "familia",
+      "hermano",
+      "hermana",
+      "abuela",
+      "abuelo",
+      "hijo",
+      "hija",
+    ],
+  },
+  {
+    name: "Perderse",
+    words: [
+      "perdido",
+      "perdida",
+      "perderme",
+      "perderse",
+      "no encontraba",
+      "no sabía dónde",
+      "no sabia donde",
+      "extraviado",
+    ],
+  },
+  {
+    name: "Caer",
+    words: [
+      "caía",
+      "caia",
+      "caer",
+      "caí",
+      "cai",
+      "caída",
+      "caida",
+      "precipicio",
+    ],
+  },
+  {
+    name: "Volar",
+    words: [
+      "volaba",
+      "volar",
+      "volando",
+      "vuelo",
+      "volé",
+      "vole",
+    ],
+  },
+  {
+    name: "Personas",
+    words: [
+      "persona",
+      "personas",
+      "gente",
+      "alguien",
+      "amigo",
+      "amiga",
+      "chico",
+      "chica",
+      "hombre",
+      "mujer",
+    ],
+  },
+  {
+    name: "Animales",
+    words: [
+      "perro",
+      "gato",
+      "caballo",
+      "animal",
+      "pájaro",
+      "pajaro",
+      "serpiente",
+      "pez",
+      "lobo",
+      "conejo",
+    ],
+  },
+  {
+    name: "Viajes",
+    words: [
+      "viaje",
+      "viajar",
+      "avión",
+      "avion",
+      "tren",
+      "autobús",
+      "autobus",
+      "coche",
+      "carretera",
+      "maleta",
+    ],
+  },
+  {
+    name: "Escuela / estudios",
+    words: [
+      "escuela",
+      "colegio",
+      "instituto",
+      "universidad",
+      "clase",
+      "profesor",
+      "profesora",
+      "examen",
+      "estudiar",
+    ],
+  },
+  {
+    name: "Muerte",
+    words: [
+      "muerte",
+      "morir",
+      "muerto",
+      "muerta",
+      "fallecido",
+      "fallecida",
+      "funeral",
+      "cementerio",
+      "entierro",
+    ],
+  },
 ];
 
 export default function App() {
@@ -156,11 +315,15 @@ export default function App() {
         ).toFixed(1)
       : "—";
 
-  /*
-   * ============================
-   * PATRONES
-   * ============================
-   */
+  const averageStress =
+    dreams.filter((d) => d.stress !== null).length > 0
+      ? (
+          dreams
+            .filter((d) => d.stress !== null)
+            .reduce((sum, d) => sum + (d.stress || 0), 0) /
+          dreams.filter((d) => d.stress !== null).length
+        ).toFixed(1)
+      : "—";
 
   const emotionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -186,84 +349,127 @@ export default function App() {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }, [dreams]);
 
-  const averageStress =
-    dreams.filter((d) => d.stress !== null).length > 0
-      ? (
-          dreams
-            .filter((d) => d.stress !== null)
-            .reduce((sum, d) => sum + (d.stress || 0), 0) /
-          dreams.filter((d) => d.stress !== null).length
-        ).toFixed(1)
-      : "—";
+  const recurringPatterns = useMemo(() => {
+    return patternWords
+      .map((pattern) => {
+        let count = 0;
 
-  const averageRestNumber =
-    restValues.length > 0
-      ? restValues.reduce((sum, value) => sum + value, 0) /
-        restValues.length
-      : null;
+        dreams.forEach((d) => {
+          const text = d.dream.toLowerCase();
 
-  /*
-   * Palabras que Somnia buscará dentro de los sueños.
-   * Esto nos permite empezar a detectar temas recurrentes
-   * sin necesidad de IA todavía.
-   */
+          const found = pattern.words.some((word) =>
+            text.includes(word)
+          );
 
-  const patternWords = [
-    {
-      name: "Agua",
-      words: ["agua", "mar", "piscina", "río", "rio", "lluvia", "océano", "oceano"],
-    },
-    {
-      name: "Casa",
-      words: ["casa", "habitación", "habitacion", "piso", "salón", "salon"],
-    },
-    {
-      name: "Familia",
-      words: ["madre", "padre", "mamá", "mama", "papá", "papa", "familia", "hermano", "hermana"],
-    },
-    {
-      name: "Perderse",
-      words: ["perdido", "perderme", "perderse", "no encontraba", "no sabía dónde", "no sabia donde"],
-    },
-    {
-      name: "Caer",
-      words: ["caía", "caia", "caer", "caí", "cai", "precipicio"],
-    },
-    {
-      name: "Volar",
-      words: ["volaba", "volar", "volando", "vuelo"],
-    },
-    {
-      name: "Personas",
-      words: ["persona", "personas", "gente", "alguien", "amigo", "amiga"],
-    },
-    {
-      name: "Animales",
-      words: ["perro", "gato", "caballo", "animal", "pájaro", "pajaro"],
-    },
-  ];
+          if (found) {
+            count++;
+          }
+        });
 
-  const recurringPatterns = patternWords
-    .map((pattern) => {
-      let count = 0;
+        return {
+          name: pattern.name,
+          count,
+        };
+      })
+      .filter((pattern) => pattern.count > 0)
+      .sort((a, b) => b.count - a.count);
+  }, [dreams]);
 
-      dreams.forEach((d) => {
+  const patternDetails = useMemo(() => {
+    return recurringPatterns.map((pattern) => {
+      const relatedDreams = dreams.filter((d) => {
         const text = d.dream.toLowerCase();
 
-        const found = pattern.words.some((word) =>
-          text.includes(word)
-        );
-
-        if (found) count++;
+        return patternWords
+          .find((p) => p.name === pattern.name)
+          ?.words.some((word) => text.includes(word));
       });
 
+      const relatedEmotions: Record<string, number> = {};
+
+      relatedDreams.forEach((d) => {
+        if (d.emotion) {
+          relatedEmotions[d.emotion] =
+            (relatedEmotions[d.emotion] || 0) + 1;
+        }
+      });
+
+      const mostCommonEmotion =
+        Object.entries(relatedEmotions).sort(
+          (a, b) => b[1] - a[1]
+        )[0];
+
       return {
-        name: pattern.name,
-        count,
+        ...pattern,
+        relatedDreams,
+        mostCommonEmotion,
       };
-    })
-    .filter((pattern) => pattern.count > 0)
-    .sort((a, b) => b.count - a.count);
+    });
+  }, [dreams, recurringPatterns]);
+
+  const strongestEmotion = emotionCounts[0];
+
+  const highestStressDream = useMemo(() => {
+    return dreams
+      .filter((d) => d.stress !== null)
+      .sort(
+        (a, b) =>
+          (b.stress || 0) - (a.stress || 0)
+      )[0];
+  }, [dreams]);
+
+  const patternSummary = useMemo(() => {
+    if (dreams.length === 0) {
+      return "Todavía no hay suficientes datos para encontrar patrones.";
+    }
+
+    if (dreams.length === 1) {
+      const parts: string[] = [];
+
+      if (recurringPatterns.length > 0) {
+        parts.push(
+          `En tu sueño aparece ${
+            recurringPatterns.length === 1
+              ? "un tema"
+              : `${recurringPatterns.length} temas`
+          } que Somnia puede seguir observando.`
+        );
+      }
+
+      if (strongestEmotion) {
+        parts.push(
+          `La emoción registrada fue ${strongestEmotion[0]}.`
+        );
+      }
+
+      return (
+        parts.join(" ") +
+        " Con más sueños podremos comparar estos elementos y detectar relaciones."
+      );
+    }
+
+    const parts: string[] = [];
+
+    if (recurringPatterns.length > 0) {
+      const mainPattern = recurringPatterns[0];
+
+      parts.push(
+        `El tema que más se repite es ${mainPattern.name}, presente en ${mainPattern.count} ${
+          mainPattern.count === 1 ? "sueño" : "sueños"
+        }.`
+      );
+    }
+
+    if (strongestEmotion) {
+      parts.push(
+        `Tu emoción más frecuente es ${strongestEmotion[0]}, registrada ${strongestEmotion[1]} ${
+          strongestEmotion[1] === 1 ? "vez" : "veces"
+        }.`
+      );
+    }
+
+    return parts.join(" ");
+  }, [dreams, recurringPatterns, strongestEmotion]);
 
   return (
     <main className="somnia-shell dashboard">
@@ -275,8 +481,6 @@ export default function App() {
             Tu diario de sueños
           </span>
         </nav>
-
-        {/* ================= INICIO ================= */}
 
         {tab === "inicio" && (
           <>
@@ -339,8 +543,6 @@ export default function App() {
             </div>
           </>
         )}
-
-        {/* ================= REGISTRAR ================= */}
 
         {tab === "registrar" && (
           <div className="card">
@@ -523,8 +725,6 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= HISTORIAL ================= */}
-
         {tab === "historial" && (
           <>
             <h2>Historial</h2>
@@ -618,8 +818,6 @@ export default function App() {
           </>
         )}
 
-        {/* ================= PATRONES ================= */}
-
         {tab === "patrones" && (
           <>
             <h2>Mis patrones</h2>
@@ -653,7 +851,6 @@ export default function App() {
               </div>
             ) : (
               <>
-                {/* TEMAS */}
 
                 <div className="card">
 
@@ -664,7 +861,8 @@ export default function App() {
                   {recurringPatterns.length === 0 ? (
                     <p className="muted">
                       Todavía no se ha detectado
-                      ningún tema recurrente.
+                      ningún elemento de los que Somnia
+                      está siguiendo.
                     </p>
                   ) : (
                     recurringPatterns.map(
@@ -683,8 +881,6 @@ export default function App() {
                   )}
 
                 </div>
-
-                {/* EMOCIONES */}
 
                 <div
                   className="card"
@@ -717,7 +913,63 @@ export default function App() {
 
                 </div>
 
-                {/* DESCANSO Y ESTRÉS */}
+                <div
+                  className="card"
+                  style={{ marginTop: 16 }}
+                >
+
+                  <h3>
+                    Relaciones entre tus sueños
+                  </h3>
+
+                  {patternDetails.length === 0 ? (
+                    <p className="muted">
+                      Todavía no hay elementos suficientes
+                      para establecer relaciones.
+                    </p>
+                  ) : (
+                    patternDetails.slice(0, 5).map(
+                      (pattern) => (
+                        <div
+                          key={pattern.name}
+                          style={{
+                            marginBottom: 18,
+                          }}
+                        >
+
+                          <p>
+                            <strong>
+                              {pattern.name}
+                            </strong>{" "}
+                            aparece en{" "}
+                            <strong>
+                              {pattern.count}
+                            </strong>{" "}
+                            {pattern.count === 1
+                              ? "sueño"
+                              : "sueños"}.
+                          </p>
+
+                          {pattern.mostCommonEmotion && (
+                            <p className="muted">
+                              La emoción más frecuente
+                              cuando aparece este tema es{" "}
+                              <strong>
+                                {
+                                  pattern
+                                    .mostCommonEmotion[0]
+                                }
+                              </strong>
+                              .
+                            </p>
+                          )}
+
+                        </div>
+                      )
+                    )
+                  )}
+
+                </div>
 
                 <div
                   className="grid grid2"
@@ -758,8 +1010,6 @@ export default function App() {
 
                 </div>
 
-                {/* SUSTANCIAS */}
-
                 <div
                   className="card"
                   style={{ marginTop: 16 }}
@@ -792,8 +1042,6 @@ export default function App() {
 
                 </div>
 
-                {/* RESUMEN */}
-
                 <div
                   className="card"
                   style={{ marginTop: 16 }}
@@ -803,29 +1051,36 @@ export default function App() {
                     ✦ Lo que Somnia ha detectado
                   </h3>
 
-                  <p className="muted">
-
-                    {dreams.length < 3
-                      ? `Has registrado ${dreams.length} ${
-                          dreams.length === 1
-                            ? "sueño"
-                            : "sueños"
-                        }. Cuando tengas más sueños,
-                        podremos encontrar patrones
-                        con mayor precisión.`
-                      : `Somnia ha analizado tus ${dreams.length}
-                        sueños registrados y ha encontrado
-                        algunos elementos que se repiten.`}
-
+                  <p>
+                    {patternSummary}
                   </p>
 
+                  {dreams.length >= 2 &&
+                    highestStressDream &&
+                    highestStressDream.stress !== null && (
+                      <p className="muted">
+                        Tu nivel de estrés más alto
+                        registrado hasta ahora ha sido{" "}
+                        <strong>
+                          {highestStressDream.stress}/10
+                        </strong>
+                        .
+                      </p>
+                    )}
+
+                  {dreams.length < 3 && (
+                    <p className="muted">
+                      Cuantos más sueños registres,
+                      más precisas serán las comparaciones.
+                    </p>
+                  )}
+
                 </div>
+
               </>
             )}
           </>
         )}
-
-        {/* ================= PERFIL ================= */}
 
         {tab === "perfil" && (
           <>
@@ -907,8 +1162,6 @@ export default function App() {
           </>
         )}
 
-        {/* ================= NAVEGACIÓN ================= */}
-
         <div className="bottom-nav">
 
           <button
@@ -973,3 +1226,4 @@ export default function App() {
     </main>
   );
 }
+```
