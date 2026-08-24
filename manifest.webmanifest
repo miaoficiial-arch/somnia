@@ -1,0 +1,9 @@
+{
+  "name": "Somnia — Tu diario de sueños",
+  "short_name": "Somnia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080b18",
+  "theme_color": "#080b18",
+  "description": "Tu diario de sueños"
+}
