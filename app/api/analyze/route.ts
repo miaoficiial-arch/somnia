@@ -1,9 +1,4 @@
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(request: Request) {
   try {
@@ -58,120 +53,38 @@ Sustancia:
 ${d.substance || "No indicada"}
 `
             )
-            .join("\n")
+            .join("\n\n")
         : "No hay sueños anteriores registrados.";
 
-    const instructions = `
+    const prompt = `
 Eres el analista de sueños de Somnia.
 
-Tu función es ayudar a la persona a reflexionar sobre sus sueños de una manera profunda, cuidadosa y personalizada.
+Ayuda a la persona a reflexionar sobre su sueño de manera profunda, cuidadosa y personalizada.
 
 IMPORTANTE:
 
-- NO presentes las interpretaciones de los sueños como verdades científicas.
-- NO hagas diagnósticos psicológicos, psiquiátricos o médicos.
-- NO hagas predicciones sobre el futuro.
-- NO afirmes que un símbolo tiene un significado universal.
-- NO utilices diccionarios genéricos de sueños.
-- Analiza siempre los elementos dentro del contexto concreto del sueño.
-- Explica varias posibilidades cuando existan diferentes interpretaciones razonables.
-- Utiliza expresiones como "podría", "parece", "una posibilidad es" o "podría estar relacionado con".
+- No presentes las interpretaciones como verdades científicas.
+- No hagas diagnósticos psicológicos, psiquiátricos o médicos.
+- No hagas predicciones sobre el futuro.
+- No afirmes que un símbolo tiene un significado universal.
+- No utilices diccionarios genéricos de sueños.
+- Analiza siempre el sueño dentro de su contexto.
+- Ofrece varias posibilidades cuando existan diferentes interpretaciones.
+- Utiliza expresiones como "podría", "parece" o "una posibilidad es".
 - Habla directamente a la persona utilizando "tú".
 - Mantén un tono cálido, cercano, profundo y reflexivo.
-- No juzgues el contenido del sueño.
-- No conviertas automáticamente un sueño desagradable en una señal de que existe un problema psicológico.
-- Si aparecen temas relacionados con pérdida, muerte, miedo, ansiedad, conflictos o relaciones, trátalos con especial cuidado.
-- Distingue entre lo que realmente aparece en el sueño y las posibles interpretaciones.
-- No inventes recuerdos, acontecimientos o conexiones que la persona no haya proporcionado.
+- No inventes recuerdos ni acontecimientos.
 
-ANALIZA ESPECIALMENTE:
-
-1. Lo que ocurre en el sueño.
-2. Las emociones presentes.
-3. Las personas que aparecen.
-4. Los lugares y escenarios.
-5. Los objetos, animales o situaciones llamativas.
-6. Las acciones y decisiones que ocurren durante el sueño.
-7. Los cambios que se producen dentro del sueño.
-8. Posibles miedos, deseos, conflictos o preocupaciones reflejados.
-9. Las relaciones entre los diferentes elementos.
-10. Los elementos que parecen tener especial importancia.
-11. La emoción que la persona sintió al despertar.
-12. La posible relación entre el sueño y el nivel de estrés o descanso registrado.
-13. Las posibles conexiones con sueños anteriores.
-
-No asumas que todo tiene necesariamente un significado profundo. Si algo parece simplemente formar parte de la historia del sueño, dilo.
-
-La respuesta debe ser extensa, detallada y personalizada.
-
-Utiliza exactamente estos apartados:
-
-# Resumen
-
-Resume lo ocurrido en el sueño sin interpretarlo todavía.
-
-# Emociones presentes
-
-Explica las emociones que parecen aparecer durante el sueño y la emoción registrada al despertar.
-
-# Elementos importantes
-
-Analiza las personas, lugares, objetos, animales, acciones y situaciones que parezcan especialmente relevantes.
-
-# Relaciones y símbolos
-
-Explica cómo se relacionan los diferentes elementos del sueño.
-
-No hagas una lista de significados universales. Analiza los símbolos dentro del contexto concreto de este sueño.
-
-# Posibles interpretaciones
-
-Ofrece varias posibilidades razonables.
-
-Explica qué elementos del sueño apoyan cada posibilidad y deja claro que son hipótesis, no hechos.
-
-# Conexión con sueños anteriores
-
-Compara el sueño actual con los sueños anteriores proporcionados.
-
-Busca temas, personas, lugares, emociones, situaciones o símbolos que se repitan.
-
-Si no existe ninguna conexión clara, dilo expresamente.
-
-No inventes conexiones.
-
-# Reflexión final
-
-Haz una reflexión personalizada sobre qué podría ser interesante observar o explorar a partir de este sueño.
-
-No afirmes saber exactamente qué significa.
-
-# Preguntas para ti
-
-Haz entre 3 y 5 preguntas abiertas relacionadas específicamente con el sueño.
-
-Evita preguntas genéricas.
-`;
-
-    const input = `
 DATOS DEL SUEÑO ACTUAL
 
 Emoción al despertar:
 ${emotion}
 
 Calidad del descanso:
-${
-  restQuality !== "" && restQuality !== null
-    ? `${restQuality}/10`
-    : "No indicada"
-}
+${restQuality}/10
 
 Estrés antes de dormir:
-${
-  stress !== "" && stress !== null
-    ? `${stress}/10`
-    : "No indicado"
-}
+${stress}/10
 
 Algo tomado antes de dormir:
 ${substance}
@@ -183,17 +96,97 @@ ${previousDreamsText}
 SUEÑO ACTUAL
 
 ${dream.trim()}
+
+Utiliza exactamente estos apartados:
+
+# Resumen
+
+Resume lo ocurrido en el sueño sin interpretarlo todavía.
+
+# Emociones presentes
+
+Explica las emociones presentes durante el sueño y la emoción al despertar.
+
+# Elementos importantes
+
+Analiza las personas, lugares, objetos, animales, acciones y situaciones relevantes.
+
+# Relaciones y símbolos
+
+Explica cómo se relacionan los diferentes elementos del sueño.
+No utilices significados universales.
+
+# Posibles interpretaciones
+
+Ofrece varias posibilidades razonables.
+Explica qué elementos apoyan cada una y deja claro que son hipótesis.
+
+# Conexión con sueños anteriores
+
+Compara el sueño actual con los sueños anteriores.
+Busca temas, personas, lugares, emociones o situaciones que se repitan.
+No inventes conexiones.
+
+# Reflexión final
+
+Haz una reflexión personalizada sobre qué podría ser interesante observar o explorar.
+
+# Preguntas para ti
+
+Haz entre 3 y 5 preguntas abiertas relacionadas específicamente con el sueño.
+
+La respuesta debe ser detallada y personalizada.
 `;
 
-    const response = await openai.responses.create({
-      model: "gpt-5-mini",
-      instructions,
-      input,
-    });
+    const hfResponse = await fetch(
+      "https://api-inference.huggingface.co/models/google/gemma-3-4b-it",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_new_tokens: 1200,
+            temperature: 0.7,
+          },
+        }),
+      }
+    );
+
+    const data = await hfResponse.json();
+
+    if (!hfResponse.ok) {
+      console.error("Error de Hugging Face:", data);
+
+      return NextResponse.json(
+        {
+          error: "La IA no ha podido analizar el sueño.",
+          details: data,
+        },
+        { status: 500 }
+      );
+    }
+
+    let analysis = "";
+
+    if (Array.isArray(data) && data[0]?.generated_text) {
+      analysis = data[0].generated_text;
+    } else if (data?.generated_text) {
+      analysis = data.generated_text;
+    }
+
+    if (!analysis) {
+      return NextResponse.json(
+        { error: "La IA no ha devuelto ningún análisis." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
-      analysis:
-        response.output_text || "No se recibió ningún análisis.",
+      analysis,
     });
   } catch (error) {
     console.error("Error analizando sueño:", error);
