@@ -139,7 +139,7 @@ La respuesta debe ser detallada y personalizada.
 `;
 
     const hfResponse = await fetch(
-      "https://api-inference.huggingface.co/models/google/gemma-3-4b-it",
+"https://router.huggingface.co/hf-inference/models/google/gemma-3-4b-it",
       {
         method: "POST",
         headers: {
