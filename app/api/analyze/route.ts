@@ -148,7 +148,7 @@ La respuesta debe ser detallada y personalizada.
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemma-2-2b-it",
+          model: "google/gemma-2-2b-it:fastest",
           messages: [
             {
               role: "user",
