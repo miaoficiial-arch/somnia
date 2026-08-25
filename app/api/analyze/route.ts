@@ -73,6 +73,7 @@ IMPORTANTE:
 - Utiliza expresiones como "podría", "parece" o "una posibilidad es".
 - Habla directamente a la persona utilizando "tú".
 - Mantén un tono cálido, cercano, profundo y reflexivo.
+- No juzgues el contenido del sueño.
 - No inventes recuerdos ni acontecimientos.
 
 DATOS DEL SUEÑO ACTUAL
@@ -139,19 +140,23 @@ La respuesta debe ser detallada y personalizada.
 `;
 
     const hfResponse = await fetch(
-"https://router.huggingface.co/hf-inference/models/HuggingFaceTB/SmolLM2-1.7B-Instruct",
+      "https://router.huggingface.co/v1/chat/completions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          Authorization: `Bearer ${process.env.HF_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 1200,
-            temperature: 0.7,
-          },
+          model: "google/gemma-2-2b-it",
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          max_tokens: 1200,
+          temperature: 0.7,
         }),
       }
     );
@@ -170,13 +175,10 @@ La respuesta debe ser detallada y personalizada.
       );
     }
 
-    let analysis = "";
-
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      analysis = data[0].generated_text;
-    } else if (data?.generated_text) {
-      analysis = data.generated_text;
-    }
+    const analysis =
+      data?.choices?.[0]?.message?.content ||
+      data?.choices?.[0]?.text ||
+      "";
 
     if (!analysis) {
       return NextResponse.json(
