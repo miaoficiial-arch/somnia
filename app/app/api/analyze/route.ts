@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     const restQuality = body.restQuality ?? "No indicada";
     const stress = body.stress ?? "No indicado";
     const substance = body.substance || "No indicada";
+
     const previousDreams = Array.isArray(body.previousDreams)
       ? body.previousDreams
       : [];
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
             .map(
               (d: any, index: number) => `
 Sueño anterior ${index + 1}:
+
 ${d.dream || "Sin descripción"}
 
 Emoción:
@@ -176,11 +178,9 @@ ${
 Algo tomado antes de dormir:
 ${substance}
 
-
 SUEÑOS ANTERIORES
 
 ${previousDreamsText}
-
 
 SUEÑO ACTUAL
 
