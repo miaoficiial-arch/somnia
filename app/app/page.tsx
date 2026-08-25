@@ -316,14 +316,11 @@ export default function App() {
         headers: {
           "Content-Type": "application/json",
         },
-       body: JSON.stringify({
-  dream: dream.trim(),
-  emotion,
-  restQuality,
-  stress,
-  substance,
-  previousDreams: dreams.slice(0, 10),
-}),
+        body: JSON.stringify({
+          dream: dream.trim(),
+          emotion,
+          previousDreams: dreams.slice(0, 10),
+        }),
       });
 
       const data = await response.json();
