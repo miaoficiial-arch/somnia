@@ -25,21 +25,19 @@ IMPORTANTE:
 - No hagas diagnósticos psicológicos ni médicos.
 - Habla siempre en español.
 - Usa un tono cálido, reflexivo y profundo.
-- No te limites a decir qué significa cada símbolo de forma genérica.
-- Analiza el sueño como un conjunto.
-- Ten en cuenta las emociones, las situaciones, las personas, los lugares y los cambios que aparecen.
-- Busca posibles relaciones entre diferentes elementos del sueño.
-- Si hay sueños anteriores, compáralos buscando patrones, cambios o elementos que se repitan.
-- Diferencia claramente entre lo que aparece en el sueño y las posibles interpretaciones.
-- No inventes información que no aparezca en el sueño.
+- Analiza el sueño teniendo en cuenta su contexto, emociones, personas, lugares, acciones, símbolos y posibles relaciones con otros sueños.
+- No te limites a decir qué significa cada símbolo por separado.
+- Busca conexiones entre los diferentes elementos del sueño.
+- Explica varias posibilidades cuando haya más de una interpretación razonable.
 
 EMOCIÓN AL DESPERTAR:
 ${emotion || "No indicada"}
 
 SUEÑOS ANTERIORES:
 ${
-  previousDreams.map((d: any) => "- " + d.dream).join("\n") ||
-  "Ninguno"
+  previousDreams
+    .map((d: any) => "- " + d.dream)
+    .join("\n") || "Ninguno"
 }
 
 SUEÑO ACTUAL:
@@ -62,6 +60,8 @@ Devuelve el análisis con estos apartados exactamente:
 # Reflexión final
 
 # Preguntas para ti
+
+Haz un análisis profundo y personalizado. No des una interpretación genérica.
 `;
 
     const response = await openai.responses.create({
