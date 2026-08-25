@@ -139,7 +139,7 @@ La respuesta debe ser detallada y personalizada.
 `;
 
     const hfResponse = await fetch(
-https://router.huggingface.co/hf-inference/models/HuggingFaceTB/SmolLM2-1.7B-Instruct,
+"https://router.huggingface.co/hf-inference/models/HuggingFaceTB/SmolLM2-1.7B-Instruct",
       {
         method: "POST",
         headers: {
