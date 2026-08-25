@@ -59,7 +59,7 @@ ${d.substance || "No indicada"}
     const prompt = `
 Eres el analista de sueños de Somnia.
 
-Ayuda a la persona a reflexionar sobre su sueño de manera profunda, cuidadosa y personalizada.
+Tu función es ayudar a la persona a reflexionar sobre su sueño de manera profunda, cuidadosa y personalizada.
 
 IMPORTANTE:
 
@@ -73,7 +73,6 @@ IMPORTANTE:
 - Utiliza expresiones como "podría", "parece" o "una posibilidad es".
 - Habla directamente a la persona utilizando "tú".
 - Mantén un tono cálido, cercano, profundo y reflexivo.
-- No juzgues el contenido del sueño.
 - No inventes recuerdos ni acontecimientos.
 
 DATOS DEL SUEÑO ACTUAL
@@ -140,23 +139,20 @@ La respuesta debe ser detallada y personalizada.
 `;
 
     const hfResponse = await fetch(
-      "https://router.huggingface.co/v1/chat/completions",
+      "https://router.huggingface.co/hf-inference/models/google/gemma-2-2b-it",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.HF_TOKEN}`,
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "openai/gpt-oss-120b:groq",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          max_tokens: 1200,
-          temperature: 0.7,
+          inputs: prompt,
+          parameters: {
+            max_new_tokens: 1200,
+            temperature: 0.7,
+            return_full_text: false,
+          },
         }),
       }
     );
@@ -175,14 +171,21 @@ La respuesta debe ser detallada y personalizada.
       );
     }
 
-    const analysis =
-      data?.choices?.[0]?.message?.content ||
-      data?.choices?.[0]?.text ||
-      "";
+    let analysis = "";
+
+    if (Array.isArray(data) && data[0]?.generated_text) {
+      analysis = data[0].generated_text;
+    } else if (data?.generated_text) {
+      analysis = data.generated_text;
+    }
 
     if (!analysis) {
+      console.error("Respuesta inesperada de Hugging Face:", data);
+
       return NextResponse.json(
-        { error: "La IA no ha devuelto ningún análisis." },
+        {
+          error: "La IA no ha devuelto ningún análisis.",
+        },
         { status: 500 }
       );
     }
