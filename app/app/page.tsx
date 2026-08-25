@@ -202,8 +202,14 @@ export default function App() {
   const [stress, setStress] = useState("");
 
   const [dreams, setDreams] = useState<Dream[]>([]);
+
   const [saved, setSaved] = useState(false);
+
+  // Estados para el análisis con IA
   const [analyze, setAnalyze] = useState(false);
+  const [analysis, setAnalysis] = useState("");
+  const [analyzing, setAnalyzing] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -291,6 +297,51 @@ export default function App() {
     await loadDreams();
   }
 
+  // Analizar el sueño mediante la API de OpenAI
+  async function analyzeDream() {
+    setError("");
+    setAnalysis("");
+    setAnalyze(true);
+
+    if (!dream.trim()) {
+      setError("Escribe primero el sueño que quieres analizar.");
+      return;
+    }
+
+    setAnalyzing(true);
+
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          dream: dream.trim(),
+          emotion,
+          previousDreams: dreams.slice(0, 10),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "No se ha podido analizar el sueño."
+        );
+      }
+
+      setAnalysis(
+        data.analysis || "No se recibió ningún análisis."
+      );
+    } catch (error) {
+      console.error(error);
+      setError("No se ha podido analizar el sueño.");
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
   const now = new Date();
 
   const dreamsThisMonth = dreams.filter((d) => {
@@ -341,7 +392,8 @@ export default function App() {
 
     dreams.forEach((d) => {
       if (d.substance && d.substance !== "Nada") {
-        counts[d.substance] = (counts[d.substance] || 0) + 1;
+        counts[d.substance] =
+          (counts[d.substance] || 0) + 1;
       }
     });
 
@@ -476,6 +528,7 @@ export default function App() {
 
         <nav className="nav">
           <div className="logo">SOMNIA</div>
+
           <span className="muted">
             Tu diario de sueños
           </span>
@@ -675,11 +728,12 @@ export default function App() {
 
               <button
                 className="btn secondary"
-                onClick={() =>
-                  setAnalyze(true)
-                }
+                onClick={analyzeDream}
+                disabled={analyzing}
               >
-                Analizar con IA
+                {analyzing
+                  ? "Analizando..."
+                  : "Analizar con IA"}
               </button>
 
             </div>
@@ -697,26 +751,22 @@ export default function App() {
               >
 
                 <h3>
-                  ✦ Análisis de ejemplo
+                  ✦ Análisis de Somnia
                 </h3>
 
-                <p>
-                  La IA podrá analizar los temas,
-                  emociones y posibles relaciones
-                  entre tus sueños.
-                </p>
-
-                <span className="badge">
-                  Posibles temas
-                </span>
-
-                <span className="badge">
-                  Emociones
-                </span>
-
-                <span className="badge">
-                  Factores de sueño
-                </span>
+                {analyzing ? (
+                  <p className="muted">
+                    Somnia está analizando tu sueño...
+                  </p>
+                ) : analysis ? (
+                  <div style={{ whiteSpace: "pre-wrap" }}>
+                    {analysis}
+                  </div>
+                ) : (
+                  <p className="muted">
+                    Escribe un sueño y pulsa «Analizar con IA».
+                  </p>
+                )}
 
               </div>
             )}
